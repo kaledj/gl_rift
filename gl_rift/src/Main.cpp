@@ -117,13 +117,10 @@ int main(int arc, char **argv) {
 	}
 
 	startup();
-
 	// Rendering loop
 	int rendering = 1;
 	while (rendering) {
-		//draw();
-		time_t timer;
-		render(time(&timer));
+		render(GetTickCount() /100);
 		SDL_GL_SwapWindow(win);
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
