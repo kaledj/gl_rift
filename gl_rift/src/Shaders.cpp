@@ -39,7 +39,6 @@ void shutdown()
 {
 	glDeleteVertexArrays(1, &vertex_array_object);
 	glDeleteProgram(rendering_program);
-	glDeleteVertexArrays(1, &vertex_array_object);
 }
 
 GLuint compile_shaders(void)

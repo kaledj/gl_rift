@@ -94,6 +94,7 @@ int main(int arc, char **argv) {
 		logSDLError(std::cout, "SDL_Init");
 		return 1;
 	}
+
 	// Create a window
 	SDL_Window *win = SDL_CreateWindow("Hello World!", 100, 100, SCREEN_WIDTH, 
 		SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
@@ -112,6 +113,7 @@ int main(int arc, char **argv) {
 	GLenum glew_status = glewInit();
 	if (glew_status != GLEW_OK) {
 		logGLEWError(std::cout, "glewInit");
+		return 3;
 	}
 
 	startup();
