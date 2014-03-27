@@ -8,54 +8,35 @@
 #include <GL/glew.h>
 // glm
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 // SDL
 #include <SDL.h>
 #include <SDL_opengl.h>
 // Helper classes
 #include "Shapes.h"
 #include "Shaders.h"
+#include "loadShaders.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
-void logSDLError(std::ostream &os, const std::string &msg) {
+GLuint programID;
+
+void logSDLError(std::ostream &os, const std::string &msg) 
+{
 	os << msg << "error: " << SDL_GetError() << std::endl;
 }
 
-void logGLEWError(std::ostream &os, const std::string &msg) {
+void logGLEWError(std::ostream &os, const std::string &msg) 
+{
 	os << "GLEW error: " << msg << std::endl;
 	
 }
 
-SDL_Texture* loadTexture(const std::string &file, SDL_Renderer *ren) {
-	// Initialize to null to avoid dangling pointer issues
-	SDL_Texture *texture = nullptr;
-	// Load the image
-	SDL_Surface *loadedImage = SDL_LoadBMP(file.c_str());
-	if (loadedImage != nullptr) {
-		texture = SDL_CreateTextureFromSurface(ren, loadedImage);
-		SDL_FreeSurface(loadedImage);
-		if (texture == nullptr) {
-			logSDLError(std::cout, "CreateTextureFromSurface");
-		}
-	}
-	else {
-		logSDLError(std::cout, "LoadBMP");
-	}
-	return texture;
-}
-
-void renderTexture(SDL_Texture *tex, SDL_Renderer *ren, int x, int y) {
-	SDL_Rect dst;
-	dst.x = x;
-	dst.y = y;
-	SDL_QueryTexture(tex, NULL, NULL, &dst.w, &dst.h);
-	SDL_RenderCopy(ren, tex, NULL, &dst);
-}
-
 int draw()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// Vertex Array Object
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -81,6 +62,28 @@ int draw()
 		0,                  // stride
 		(void*)0            // array buffer offset
 		);
+
+	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+	glm::mat4 Projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+	// Camera matrix
+	glm::mat4 View = glm::lookAt(
+		glm::vec3(4, 3, 3), // Camera is at (4,3,3), in World Space
+		glm::vec3(0, 0, 0), // and looks at the origin
+		glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
+		);
+	// Model matrix : an identity matrix (model will be at the origin)
+	glm::mat4 Model = glm::mat4(1.0f);  // Changes for each model !
+	// Our ModelViewProjection : multiplication of our 3 matrices
+	glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
+
+	// Get a handle for our "MVP" uniform.
+	// Only at initialisation time.
+	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+
+	// Send our transformation to the currently bound shader,
+	// in the "MVP" uniform
+	// For each model you render, since the MVP will be different (at least the M part)
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	// Draw the triangle !
 	glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -116,11 +119,15 @@ int main(int arc, char **argv) {
 		return 3;
 	}
 
-	startup();
+	programID = LoadShaders("../gl_rift/src/VertexShader.glsl", "../gl_rift/src/FragmentShader.glsl");
+	glUseProgram(programID);
+	//startup();
+			
 	// Rendering loop
 	int rendering = 1;
 	while (rendering) {
-		render(GetTickCount() /100);
+		draw();
+		//render(SDL_GetTicks() /100);
 		SDL_GL_SwapWindow(win);
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -142,7 +149,5 @@ int main(int arc, char **argv) {
 	SDL_DestroyWindow(win);
 
 	SDL_Quit();
-	return 0;
-
-	
+	return 0;	
 }

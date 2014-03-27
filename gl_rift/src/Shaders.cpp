@@ -12,15 +12,16 @@ GLuint vertex_array_object;
 
 void render(double currentTime)
 {
-	const GLfloat color[] = { 0.0f, 0.2, 0.0f, 1.0f };
+	const GLfloat color[] = { 0.6f, 0.5f, 0.0f, 1.0f };
 	const GLfloat tri_color[] = { 0.0f, 0.8, 0.3f, 1.0f };
 	glClearBufferfv(GL_COLOR, 0, color);
 
 	// Use the program we created for rendering 
 	glUseProgram(rendering_program);
 
-	GLfloat attrib[] = { (float)sin(currentTime) * 0.5f + 0.5f,
-		(float)cos(currentTime) * 0.5f + 0.5f, 0.0f, 1.0f };
+	GLfloat attrib[] = { (float)sin(currentTime) * 0.5f,
+						 (float)cos(currentTime) * 0.6f,
+						 0.0f, 1.0f };
 
 	// Assign attributes to go into vertex shader
 	glVertexAttrib4fv(0, attrib);
@@ -150,6 +151,28 @@ GLuint compile_shaders(void)
 	glShaderSource(geometry_shader, 1, geometry_shader_source, NULL);
 	glCompileShader(geometry_shader);
 
+	// Check status of compiled shaders
+	int status;
+	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
+	if (!status) {
+		std::cout << "Vertex shader failed to compile" << std::endl;
+	}
+	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
+	if (!status) {
+		std::cout << "Fragment shader failed to compile" << std::endl;
+	}
+	glGetShaderiv(tessellation_control_shader, GL_COMPILE_STATUS, &status);
+	if (!status) {
+		std::cout << "Tessellation control shader failed to compile" << std::endl;
+	}
+	glGetShaderiv(tessellation_evaluation_shader, GL_COMPILE_STATUS, &status);
+	if (!status) {
+		std::cout << "Tessellation evaluatation shader failed to compile" << std::endl;
+	}
+	glGetShaderiv(geometry_shader, GL_COMPILE_STATUS, &status);
+	if (!status) {
+		std::cout << "Geometry shader failed to compile" << std::endl;
+	}
 
 	program = glCreateProgram();
 	glAttachShader(program, vertex_shader);
@@ -174,3 +197,4 @@ void startup()
 	glGenVertexArrays(1, &vertex_array_object);
 	glBindVertexArray(vertex_array_object);
 }
+
