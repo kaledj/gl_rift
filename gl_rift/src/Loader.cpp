@@ -1,4 +1,4 @@
-#include "loadShaders.h"
+#include "Loader.h"
 
 GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_path){
 
@@ -42,7 +42,7 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 	glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 	std::vector<char> VertexShaderErrorMessage(InfoLogLength);
 	glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-	fprintf(stdout, "%s\n", &VertexShaderErrorMessage[0]);
+	std::cout << VertexShaderErrorMessage[0] << std::endl;
 
 	// Compile Fragment Shader
 	printf("Compiling shader : %s\n", fragment_file_path);
@@ -56,10 +56,10 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 	glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 	std::vector<char> FragmentShaderErrorMessage(InfoLogLength);
 	glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-	fprintf(stdout, "%s\n", &FragmentShaderErrorMessage[0]);
+	std::cout << FragmentShaderErrorMessage[0] << std::endl;
 
 	// Link the program
-	fprintf(stdout, "Linking program\n");
+	std::cout << "Linking program" << std::endl;
 	GLuint ProgramID = glCreateProgram();
 	glAttachShader(ProgramID, VertexShaderID);
 	glAttachShader(ProgramID, FragmentShaderID);
@@ -70,10 +70,31 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 	glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 	std::vector<char> ProgramErrorMessage(max(InfoLogLength, int(1)));
 	glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-	fprintf(stdout, "%s\n", &ProgramErrorMessage[0]);
+	std::cout << ProgramErrorMessage[0] << std::endl;
 
 	glDeleteShader(VertexShaderID);
 	glDeleteShader(FragmentShaderID);
 
 	return ProgramID;
+}
+
+GLuint LoadTexture(const char * texture_path)
+{
+	// Create a texture
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+
+	// Bind texture
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	
+	// Load texture?
+	
+	// Trilinear filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	return textureID;
 }

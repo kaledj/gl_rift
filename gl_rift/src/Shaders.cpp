@@ -27,7 +27,7 @@ void render(double currentTime)
 	glVertexAttrib4fv(0, attrib);
 	glVertexAttrib4fv(1, tri_color);
 
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glPointSize(5);
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
