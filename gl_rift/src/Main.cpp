@@ -68,6 +68,7 @@ int main(int arc, char **argv) {
 			}
 		}
 	}
+
 	glDeleteProgram(programID);
 	SDL_GL_DeleteContext(sdl_opengl_context);
 	SDL_DestroyWindow(win);
